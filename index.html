@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>One-way Mirror Simulator</title>
+
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --border: #d8e0ea;
+      --text: #1f2937;
+      --muted: #5f6b7a;
+      --accent: #2563eb;
+      --room-a: #fff4bf;
+      --room-b: #dbeafe;
+      --dark-room: #111827;
+      --ray-a: #f59e0b;
+      --ray-b: #60a5fa;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      padding: 24px;
+      background: #111827;
+      color: white;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 2rem;
+    }
+
+    header p {
+      margin: 0;
+      color: #d1d5db;
+      font-size: 1rem;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 18px;
+      align-items: end;
+    }
+
+    .control-block label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+    }
+
+    select,
+    button {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: white;
+      font-size: 0.95rem;
+    }
+
+    button {
+      cursor: pointer;
+      background: #eff6ff;
+      color: #1e3a8a;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #dbeafe;
+    }
+
+    .small-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .checkbox-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+      color: var(--muted);
+    }
+
+    .checkbox-row label {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      font-weight: normal;
+    }
+
+    .simulator-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+    }
+
+    .viewer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .viewer {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: white;
+    }
+
+    .viewer h3 {
+      margin: 0;
+      padding: 12px;
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border);
+      font-size: 1rem;
+    }
+
+    .viewer-scene {
+      position: relative;
+      height: 190px;
+      overflow: hidden;
+      background: #111827;
+    }
+
+    .through-layer,
+    .reflection-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 16px;
+      font-weight: bold;
+      transition: opacity 0.25s ease, filter 0.25s ease;
+    }
+
+    .through-layer {
+      background: linear-gradient(135deg, #bfdbfe, #fef3c7);
+      color: #111827;
+    }
+
+    .reflection-layer {
+      background: radial-gradient(circle, rgba(255,255,255,0.75), rgba(148,163,184,0.65));
+      color: #111827;
+      text-shadow: 0 1px 2px white;
+      mix-blend-mode: screen;
+    }
+
+    .viewer-info {
+      padding: 12px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      min-height: 78px;
+    }
+
+    .bar-row {
+      margin-top: 10px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .bar-bg {
+      height: 10px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      transition: width 0.25s ease;
+    }
+
+    .explanation {
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .explanation strong {
+      color: var(--text);
+    }
+
+    .challenge-list {
+      margin: 0;
+      padding-left: 20px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 900px) {
+      .controls,
+      .simulator-grid,
+      .viewer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>One-way Mirror Simulator</h1>
+    <p>Explore how light, reflection, and room brightness affect what each person sees.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Controls</h2>
+
+      <div class="controls">
+        <div class="control-block">
+          <label for="roomALight">Room A light: <span id="roomAValue">100</span>%</label>
+          <input id="roomALight" type="range" min="0" max="100" value="100" />
+          <div class="small-buttons">
+            <button id="roomAOff">A Off</button>
+            <button id="roomAOn">A On</button>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label for="roomBLight">Room B light: <span id="roomBValue">0</span>%</label>
+          <input id="roomBLight" type="range" min="0" max="100" value="0" />
+          <div class="small-buttons">
+            <button id="roomBOff">B Off</button>
+            <button id="roomBOn">B On</button>
+          </div>
+        </div>
+
+        <div class="control-block">
+          <label for="materialSelect">Material between rooms</label>
+          <select id="materialSelect">
+            <option value="glass">Clear glass</option>
+            <option value="mirror">Plane mirror</option>
+            <option value="oneWayMirror" selected>One-way mirror</option>
+          </select>
+        </div>
+
+        <div class="control-block">
+          <label>Quick setup</label>
+          <button id="classicSetup">Bright A, dark B</button>
+          <div class="small-buttons">
+            <button id="reverseSetup">Dark A, bright B</button>
+            <button id="bothBright">Both bright</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <label>
+          <input id="showRays" type="checkbox" checked />
+          Show light rays
+        </label>
+
+        <label>
+          <input id="showPercentages" type="checkbox" checked />
+          Show brightness numbers
+        </label>
+
+        <label>
+          <input id="simpleMode" type="checkbox" checked />
+          Grade 6 language
+        </label>
+      </div>
+    </section>
+
+    <section class="simulator-grid">
+      <div class="card">
+        <h2>Rooms and light rays</h2>
+
+        <svg id="mainSvg" viewBox="0 0 1000 440" aria-label="Two-room one-way mirror simulation">
+          <defs>
+            <marker id="arrowA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"></path>
+            </marker>
+
+            <marker id="arrowB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#60a5fa"></path>
+            </marker>
+          </defs>
+
+          <!-- Room backgrounds -->
+          <rect id="roomABg" x="40" y="70" width="430" height="300" rx="16" fill="#fff4bf"></rect>
+          <rect id="roomBBg" x="530" y="70" width="430" height="300" rx="16" fill="#111827"></rect>
+
+          <!-- Room labels -->
+          <text x="70" y="105" font-size="24" font-weight="bold" fill="#111827">Room A</text>
+          <text x="805" y="105" font-size="24" font-weight="bold" fill="#ffffff">Room B</text>
+
+          <!-- Barrier -->
+          <rect id="barrier" x="485" y="70" width="30" height="300" rx="8" fill="#9ca3af"></rect>
+          <text id="barrierLabel" x="500" y="395" font-size="18" text-anchor="middle" fill="#111827">One-way mirror</text>
+
+          <!-- Room A lamp -->
+          <circle id="lampAGlow" cx="125" cy="160" r="55" fill="#fde68a" opacity="1"></circle>
+          <rect x="110" y="120" width="30" height="50" rx="6" fill="#374151"></rect>
+          <circle x="125" cy="170" r="0"></circle>
+          <path d="M105 170 H145 L158 205 H92 Z" fill="#6b7280"></path>
+          <text x="125" y="230" font-size="16" text-anchor="middle" fill="#111827">Light A</text>
+
+          <!-- Room B lamp -->
+          <circle id="lampBGlow" cx="875" cy="160" r="55" fill="#bfdbfe" opacity="0"></circle>
+          <rect x="860" y="120" width="30" height="50" rx="6" fill="#374151"></rect>
+          <path d="M855 170 H895 L908 205 H842 Z" fill="#6b7280"></path>
+          <text id="lightBLabel" x="875" y="230" font-size="16" text-anchor="middle" fill="#ffffff">Light B</text>
+
+          <!-- Person A -->
+          <circle cx="250" cy="205" r="28" fill="#f97316"></circle>
+          <rect x="220" y="235" width="60" height="85" rx="22" fill="#fb923c"></rect>
+          <text x="250" y="345" font-size="17" text-anchor="middle" fill="#111827">Person A</text>
+
+          <!-- Person B -->
+          <circle cx="750" cy="205" r="28" fill="#3b82f6"></circle>
+          <rect x="720" y="235" width="60" height="85" rx="22" fill="#60a5fa"></rect>
+          <text id="personBLabel" x="750" y="345" font-size="17" text-anchor="middle" fill="#ffffff">Person B</text>
+
+          <!-- Rays from Room A -->
+          <g id="raysA">
+            <line id="rayAIncident" x1="250" y1="210" x2="485" y2="210" stroke="#f59e0b" stroke-width="8" opacity="1" marker-end="url(#arrowA)"></line>
+            <line id="rayAReflect" x1="485" y1="222" x2="265" y2="285" stroke="#f59e0b" stroke-width="8" opacity="0.6" marker-end="url(#arrowA)"></line>
+            <line id="rayATransmit" x1="515" y1="210" x2="735" y2="210" stroke="#f59e0b" stroke-width="6" opacity="0.4" marker-end="url(#arrowA)"></line>
+          </g>
+
+          <!-- Rays from Room B -->
+          <g id="raysB">
+            <line id="rayBIncident" x1="750" y1="260" x2="515" y2="260" stroke="#60a5fa" stroke-width="8" opacity="0" marker-end="url(#arrowB)"></line>
+            <line id="rayBReflect" x1="515" y1="272" x2="735" y2="315" stroke="#60a5fa" stroke-width="8" opacity="0" marker-end="url(#arrowB)"></line>
+            <line id="rayBTransmit" x1="485" y1="260" x2="265" y2="260" stroke="#60a5fa" stroke-width="6" opacity="0" marker-end="url(#arrowB)"></line>
+          </g>
+
+          <!-- Percent labels -->
+          <g id="percentLabels">
+            <rect x="340" y="145" width="320" height="76" rx="12" fill="white" opacity="0.9"></rect>
+            <text id="aRayLabel" x="500" y="175" font-size="16" text-anchor="middle" fill="#111827">Room A light: some reflects, some passes through</text>
+            <text id="bRayLabel" x="500" y="202" font-size="16" text-anchor="middle" fill="#111827">Room B light: very little, because the room is dark</text>
+          </g>
+        </svg>
+      </div>
+
+      <div class="card">
+        <h2>Zoomed-in mirror</h2>
+
+        <svg id="zoomSvg" viewBox="0 0 420 440" aria-label="Zoomed in mirror showing light reflection and transmission">
+          <defs>
+            <marker id="zoomArrowA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"></path>
+            </marker>
+
+            <marker id="zoomArrowB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+              <path d="M0,0 L0,6 L9,3 z" fill="#60a5fa"></path>
+            </marker>
+          </defs>
+
+          <rect x="185" y="40" width="50" height="320" rx="10" fill="#9ca3af"></rect>
+          <text id="zoomMaterialLabel" x="210" y="390" text-anchor="middle" font-size="18" font-weight="bold">One-way mirror</text>
+
+          <text x="80" y="42" text-anchor="middle" font-size="16" font-weight="bold">Room A side</text>
+          <text x="340" y="42" text-anchor="middle" font-size="16" font-weight="bold">Room B side</text>
+
+          <line id="zoomAIncident" x1="55" y1="140" x2="185" y2="180" stroke="#f59e0b" stroke-width="8" opacity="1" marker-end="url(#zoomArrowA)"></line>
+          <line id="zoomAReflect" x1="185" y1="190" x2="65" y2="255" stroke="#f59e0b" stroke-width="8" opacity="0.6" marker-end="url(#zoomArrowA)"></line>
+          <line id="zoomATransmit" x1="235" y1="180" x2="365" y2="140" stroke="#f59e0b" stroke-width="6" opacity="0.4" marker-end="url(#zoomArrowA)"></line>
+
+          <line id="zoomBIncident" x1="365" y1="300" x2="235" y2="260" stroke="#60a5fa" stroke-width="8" opacity="0" marker-end="url(#zoomArrowB)"></line>
+          <line id="zoomBReflect" x1="235" y1="270" x2="355" y2="350" stroke="#60a5fa" stroke-width="8" opacity="0" marker-end="url(#zoomArrowB)"></line>
+          <line id="zoomBTransmit" x1="185" y1="260" x2="55" y2="300" stroke="#60a5fa" stroke-width="6" opacity="0" marker-end="url(#zoomArrowB)"></line>
+
+          <rect x="35" y="405" width="350" height="26" rx="8" fill="#f1f5f9"></rect>
+          <text id="zoomExplanation" x="210" y="424" font-size="14" text-anchor="middle" fill="#334155">
+            Some light reflects. Some light passes through.
+          </text>
+        </svg>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>What each person sees</h2>
+
+      <div class="viewer-grid">
+        <div class="viewer">
+          <h3>Person A's view</h3>
+          <div class="viewer-scene">
+            <div id="viewerAThrough" class="through-layer">View through to Room B<br>and Person B</div>
+            <div id="viewerAReflect" class="reflection-layer">Reflection of Person A</div>
+          </div>
+          <div class="viewer-info">
+            <div id="viewerAText">Person A mostly sees their own reflection.</div>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Reflection</span>
+                <span id="aReflectionValue">60%</span>
+              </div>
+              <div class="bar-bg">
+                <div id="aReflectionBar" class="bar-fill"></div>
+              </div>
+            </div>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Seeing through</span>
+                <span id="aThroughValue">0%</span>
+              </div>
+              <div class="bar-bg">
+                <div id="aThroughBar" class="bar-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="viewer">
+          <h3>Person B's view</h3>
+          <div class="viewer-scene">
+            <div id="viewerBThrough" class="through-layer">View through to Room A<br>and Person A</div>
+            <div id="viewerBReflect" class="reflection-layer">Reflection of Person B</div>
+          </div>
+          <div class="viewer-info">
+            <div id="viewerBText">Person B mostly sees through into Room A.</div>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Reflection</span>
+                <span id="bReflectionValue">0%</span>
+              </div>
+              <div class="bar-bg">
+                <div id="bReflectionBar" class="bar-fill"></div>
+              </div>
+            </div>
+
+            <div class="bar-row">
+              <div class="bar-label">
+                <span>Seeing through</span>
+                <span id="bThroughValue">40%</span>
+              </div>
+              <div class="bar-bg">
+                <div id="bThroughBar" class="bar-fill"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card explanation">
+      <h2>Key idea</h2>
+      <p id="mainExplanation">
+        <strong>A one-way mirror is not really one-way.</strong> It partly reflects light and partly lets light pass through.
+        The person on the brighter side usually sees a reflection. The person on the darker side can often see through into the brighter room.
+      </p>
+    </section>
+
+    <section class="card">
+      <h2>Student challenges</h2>
+      <ol class="challenge-list">
+        <li>Set the simulator so Person A sees mostly a reflection.</li>
+        <li>Set the simulator so Person B can see clearly into Room A.</li>
+        <li>Change the material to clear glass. What changes?</li>
+        <li>Change the material to a plane mirror. What changes?</li>
+        <li>Can both people see each other clearly at the same time? Explain your answer.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    const materials = {
+      glass: {
+        name: "Clear glass",
+        simpleName: "Clear glass",
+        reflectance: 0.08,
+        transmittance: 0.90,
+        barrierColour: "#bae6fd",
+        explanation: "Clear glass mostly lets light pass through. It only makes a faint reflection."
+      },
+      mirror: {
+        name: "Plane mirror",
+        simpleName: "Mirror",
+        reflectance: 0.95,
+        transmittance: 0.00,
+        barrierColour: "#cbd5e1",
+        explanation: "A plane mirror mostly reflects light. Almost no light passes through."
+      },
+      oneWayMirror: {
+        name: "One-way mirror",
+        simpleName: "One-way mirror",
+        reflectance: 0.60,
+        transmittance: 0.40,
+        barrierColour: "#94a3b8",
+        explanation: "A one-way mirror partly reflects light and partly lets light pass through. The lighting makes it seem one-way."
+      }
+    };
+
+    const state = {
+      roomALight: 100,
+      roomBLight: 0,
+      material: "oneWayMirror",
+      showRays: true,
+      showPercentages: true,
+      simpleMode: true
+    };
+
+    const ids = [
+      "roomALight", "roomBLight", "materialSelect",
+      "showRays", "showPercentages", "simpleMode",
+      "roomAValue", "roomBValue",
+      "roomABg", "roomBBg",
+      "lampAGlow", "lampBGlow",
+      "barrier", "barrierLabel", "zoomMaterialLabel",
+      "lightBLabel", "personBLabel",
+      "raysA", "raysB", "percentLabels",
+      "rayAIncident", "rayAReflect", "rayATransmit",
+      "rayBIncident", "rayBReflect", "rayBTransmit",
+      "zoomAIncident", "zoomAReflect", "zoomATransmit",
+      "zoomBIncident", "zoomBReflect", "zoomBTransmit",
+      "aRayLabel", "bRayLabel", "zoomExplanation",
+      "viewerAThrough", "viewerAReflect", "viewerBThrough", "viewerBReflect",
+      "viewerAText", "viewerBText",
+      "aReflectionValue", "aThroughValue", "bReflectionValue", "bThroughValue",
+      "aReflectionBar", "aThroughBar", "bReflectionBar", "bThroughBar",
+      "mainExplanation"
+    ];
+
+    const el = {};
+    ids.forEach(id => el[id] = document.getElementById(id));
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function percent(value) {
+      return Math.round(clamp(value, 0, 100));
+    }
+
+    function opacityFromBrightness(value) {
+      return clamp(value / 100, 0, 1);
+    }
+
+    function strokeWidthFromBrightness(value) {
+      return 2 + (clamp(value, 0, 100) / 100) * 8;
+    }
+
+    function roomFill(brightness, brightColour) {
+      const b = clamp(brightness, 0, 100) / 100;
+
+      if (b < 0.05) {
+        return "#111827";
+      }
+
+      if (brightColour === "A") {
+        const red = Math.round(17 + b * 238);
+        const green = Math.round(24 + b * 220);
+        const blue = Math.round(39 + b * 130);
+        return `rgb(${red}, ${green}, ${blue})`;
+      }
+
+      const red = Math.round(17 + b * 174);
+      const green = Math.round(24 + b * 195);
+      const blue = Math.round(39 + b * 216);
+      return `rgb(${red}, ${green}, ${blue})`;
+    }
+
+    function calculateView() {
+      const material = materials[state.material];
+
+      const aReflection = state.roomALight * material.reflectance;
+      const aThrough = state.roomBLight * material.transmittance;
+
+      const bReflection = state.roomBLight * material.reflectance;
+      const bThrough = state.roomALight * material.transmittance;
+
+      return {
+        material,
+        aReflection,
+        aThrough,
+        bReflection,
+        bThrough,
+        aIncident: state.roomALight,
+        bIncident: state.roomBLight,
+        aTransmit: state.roomALight * material.transmittance,
+        bTransmit: state.roomBLight * material.transmittance,
+        aReflect: state.roomALight * material.reflectance,
+        bReflect: state.roomBLight * material.reflectance
+      };
+    }
+
+    function describeView(person, reflection, through) {
+      if (reflection < 5 && through < 5) {
+        return `${person} sees very little because not much light reaches their eyes.`;
+      }
+
+      if (reflection > through * 1.4) {
+        return `${person} mostly sees their own reflection.`;
+      }
+
+      if (through > reflection * 1.4) {
+        return `${person} mostly sees through into the other room.`;
+      }
+
+      return `${person} sees a mixture: some reflection and some view through the material.`;
+    }
+
+    function setRayStyle(line, brightness) {
+      line.setAttribute("opacity", state.showRays ? opacityFromBrightness(brightness) : 0);
+      line.setAttribute("stroke-width", strokeWidthFromBrightness(brightness));
+    }
+
+    function updateBars(view) {
+      const aReflection = percent(view.aReflection);
+      const aThrough = percent(view.aThrough);
+      const bReflection = percent(view.bReflection);
+      const bThrough = percent(view.bThrough);
+
+      el.aReflectionValue.textContent = `${aReflection}%`;
+      el.aThroughValue.textContent = `${aThrough}%`;
+      el.bReflectionValue.textContent = `${bReflection}%`;
+      el.bThroughValue.textContent = `${bThrough}%`;
+
+      el.aReflectionBar.style.width = `${aReflection}%`;
+      el.aThroughBar.style.width = `${aThrough}%`;
+      el.bReflectionBar.style.width = `${bReflection}%`;
+      el.bThroughBar.style.width = `${bThrough}%`;
+    }
+
+    function updateViewerWindows(view) {
+      el.viewerAReflect.style.opacity = opacityFromBrightness(view.aReflection);
+      el.viewerAThrough.style.opacity = opacityFromBrightness(view.aThrough);
+
+      el.viewerBReflect.style.opacity = opacityFromBrightness(view.bReflection);
+      el.viewerBThrough.style.opacity = opacityFromBrightness(view.bThrough);
+
+      el.viewerAText.textContent = describeView("Person A", view.aReflection, view.aThrough);
+      el.viewerBText.textContent = describeView("Person B", view.bReflection, view.bThrough);
+    }
+
+    function updateLabels(view) {
+      const material = view.material;
+
+      el.roomAValue.textContent = state.roomALight;
+      el.roomBValue.textContent = state.roomBLight;
+
+      el.barrierLabel.textContent = material.simpleName;
+      el.zoomMaterialLabel.textContent = material.simpleName;
+
+      if (state.simpleMode) {
+        el.aRayLabel.textContent = "Room A light: some bounces back, some passes through";
+        el.bRayLabel.textContent = "Room B light: less light if the room is darker";
+        el.zoomExplanation.textContent = "Some light bounces back. Some light passes through.";
+        el.mainExplanation.innerHTML =
+          `<strong>A one-way mirror is not really one-way.</strong> It partly bounces light back and partly lets light pass through. The person on the brighter side usually sees a reflection. The person on the darker side can often see into the brighter room.`;
+      } else {
+        el.aRayLabel.textContent =
+          `Room A: reflected ${percent(view.aReflect)}%, transmitted ${percent(view.aTransmit)}%`;
+        el.bRayLabel.textContent =
+          `Room B: reflected ${percent(view.bReflect)}%, transmitted ${percent(view.bTransmit)}%`;
+        el.zoomExplanation.textContent =
+          `Reflectance: ${Math.round(material.reflectance * 100)}%, transmittance: ${Math.round(material.transmittance * 100)}%`;
+        el.mainExplanation.innerHTML =
+          `<strong>Scientific explanation:</strong> The material has a reflectance and a transmittance. A viewer sees light reflected from their own room and light transmitted from the other room. The brighter room sends more light, so it usually dominates what is seen.`;
+      }
+
+      el.percentLabels.style.display = state.showPercentages ? "block" : "none";
+    }
+
+    function updateRoomAppearance(view) {
+      el.roomABg.setAttribute("fill", roomFill(state.roomALight, "A"));
+      el.roomBBg.setAttribute("fill", roomFill(state.roomBLight, "B"));
+
+      el.lampAGlow.setAttribute("opacity", opacityFromBrightness(state.roomALight));
+      el.lampBGlow.setAttribute("opacity", opacityFromBrightness(state.roomBLight));
+
+      el.barrier.setAttribute("fill", view.material.barrierColour);
+
+      const bTextColour = state.roomBLight < 35 ? "#ffffff" : "#111827";
+      el.lightBLabel.setAttribute("fill", bTextColour);
+      el.personBLabel.setAttribute("fill", bTextColour);
+    }
+
+    function updateRays(view) {
+      setRayStyle(el.rayAIncident, view.aIncident);
+      setRayStyle(el.rayAReflect, view.aReflect);
+      setRayStyle(el.rayATransmit, view.aTransmit);
+
+      setRayStyle(el.rayBIncident, view.bIncident);
+      setRayStyle(el.rayBReflect, view.bReflect);
+      setRayStyle(el.rayBTransmit, view.bTransmit);
+
+      setRayStyle(el.zoomAIncident, view.aIncident);
+      setRayStyle(el.zoomAReflect, view.aReflect);
+      setRayStyle(el.zoomATransmit, view.aTransmit);
+
+      setRayStyle(el.zoomBIncident, view.bIncident);
+      setRayStyle(el.zoomBReflect, view.bReflect);
+      setRayStyle(el.zoomBTransmit, view.bTransmit);
+    }
+
+    function render() {
+      const view = calculateView();
+
+      updateRoomAppearance(view);
+      updateRays(view);
+      updateViewerWindows(view);
+      updateBars(view);
+      updateLabels(view);
+    }
+
+    function setLights(a, b) {
+      state.roomALight = a;
+      state.roomBLight = b;
+
+      el.roomALight.value = a;
+      el.roomBLight.value = b;
+
+      render();
+    }
+
+    el.roomALight.addEventListener("input", event => {
+      state.roomALight = Number(event.target.value);
+      render();
+    });
+
+    el.roomBLight.addEventListener("input", event => {
+      state.roomBLight = Number(event.target.value);
+      render();
+    });
+
+    el.materialSelect.addEventListener("change", event => {
+      state.material = event.target.value;
+      render();
+    });
+
+    el.showRays.addEventListener("change", event => {
+      state.showRays = event.target.checked;
+      render();
+    });
+
+    el.showPercentages.addEventListener("change", event => {
+      state.showPercentages = event.target.checked;
+      render();
+    });
+
+    el.simpleMode.addEventListener("change", event => {
+      state.simpleMode = event.target.checked;
+      render();
+    });
+
+    document.getElementById("roomAOff").addEventListener("click", () => setLights(0, state.roomBLight));
+    document.getElementById("roomAOn").addEventListener("click", () => setLights(100, state.roomBLight));
+    document.getElementById("roomBOff").addEventListener("click", () => setLights(state.roomALight, 0));
+    document.getElementById("roomBOn").addEventListener("click", () => setLights(state.roomALight, 100));
+
+    document.getElementById("classicSetup").addEventListener("click", () => {
+      state.material = "oneWayMirror";
+      el.materialSelect.value = "oneWayMirror";
+      setLights(100, 0);
+    });
+
+    document.getElementById("reverseSetup").addEventListener("click", () => {
+      state.material = "oneWayMirror";
+      el.materialSelect.value = "oneWayMirror";
+      setLights(0, 100);
+    });
+
+    document.getElementById("bothBright").addEventListener("click", () => {
+      state.material = "oneWayMirror";
+      el.materialSelect.value = "oneWayMirror";
+      setLights(100, 100);
+    });
+
+    render();
+  </script>
+</body>
+</html>
