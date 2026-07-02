@@ -25,9 +25,9 @@
       --cool: #8fc2ff;
 
       /* Scene calibration */
-      --mirror-x: 50.7%;
-      --room-top: 8.2%;
-      --room-bottom: 92.1%;
+      --mirror-x: 52.0%;
+      --room-top: 4.4%;
+      --room-bottom: 93.2%;
 
       --scene-url: url("Lesson%202%20-%20What%20happens%20if%20we%20change%20the%20light_%20(7).png");
     }
@@ -756,8 +756,8 @@
               </radialGradient>
             </defs>
 
-            <circle id="roomAGlow" cx="345" cy="156" r="205" fill="url(#warmGlow)"></circle>
-            <circle id="roomBGlow" cx="1028" cy="156" r="205" fill="url(#coolGlow)"></circle>
+            <circle id="roomAGlow" cx="326" cy="117" r="205" fill="url(#warmGlow)"></circle>
+<circle id="roomBGlow" cx="1055" cy="117" r="205" fill="url(#coolGlow)"></circle>
           </svg>
 
           <svg class="mirror-overlay" viewBox="0 0 1366 768" preserveAspectRatio="none">
@@ -956,22 +956,26 @@
     const SCENE_HEIGHT = 768;
 
     const geometry = {
-      mirrorX: 692,
-      ceilingY: 63,
-      floorY: 675,
+  mirrorX: 711,
+  ceilingY: 34,
+  floorY: 716,
 
-      bulbA: { x: 349, y: 157 },
-      bulbB: { x: 1030, y: 157 },
+  // Light sources
+  bulbA: { x: 326, y: 117 },
+  bulbB: { x: 1055, y: 117 },
 
-      studentHit: { x: 354, y: 306 },
-      teacherHit: { x: 1021, y: 307 },
+  // Where light from the bulbs hits each person
+  studentHit: { x: 325, y: 256 },
+  teacherHit: { x: 1023, y: 270 },
 
-      studentEye: { x: 335, y: 348 },
-      teacherEye: { x: 1001, y: 348 },
+  // Where reflected/transmitted light enters the eyes
+  studentEye: { x: 346, y: 294 },
+  teacherEye: { x: 1023, y: 303 },
 
-      mirrorA: { x: 692, y: 332 },
-      mirrorB: { x: 692, y: 360 }
-    };
+  // Points of incidence on the mirror
+  mirrorA: { x: 711, y: 310 },
+  mirrorB: { x: 711, y: 330 }
+};
 
     const closeupGeometry = {
       mirrorX: 180,
