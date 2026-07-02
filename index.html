@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>One-way Mirror Simulator</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,13 +19,17 @@
       --border: #cfdcc5;
       --text: #1f2937;
       --muted: #5f6b7a;
-      --orange: #f59e0b;
-      --blue: #2563eb;
-      --warm: #facc15;
-      --cool: #93c5fd;
 
-      /* Main calibration value. Adjust this if the room split looks slightly off. */
-      --mirror-x: 51.4%;
+      /* Consistent room colours */
+      --warm: #f0c43c;
+      --cool: #8fc2ff;
+
+      /* Scene calibration */
+      --mirror-x: 50.7%;
+      --room-top: 8.2%;
+      --room-bottom: 92.1%;
+
+      --scene-url: url("Lesson%202%20-%20What%20happens%20if%20we%20change%20the%20light_%20(7).png");
     }
 
     * {
@@ -52,7 +55,7 @@
       flex: 0 0 auto;
       background: white;
       border-bottom: 4px solid var(--green);
-      padding: 12px 16px 10px;
+      padding: 10px 16px 8px;
       text-align: center;
     }
 
@@ -63,7 +66,7 @@
       font-family: "Boogaloo", cursive;
       color: var(--green);
       line-height: 1.05;
-      letter-spacing: 0.3px;
+      letter-spacing: 0.25px;
     }
 
     h1 {
@@ -79,24 +82,24 @@
     }
 
     .app {
-      --left-w: 300px;
-      --right-w: 300px;
+      --left-w: 288px;
+      --right-w: 286px;
 
       flex: 1 1 auto;
       min-height: 0;
       display: grid;
       grid-template-columns: var(--left-w) minmax(0, 1fr) var(--right-w);
-      gap: 12px;
-      padding: 12px;
+      gap: 10px;
+      padding: 10px;
       transition: grid-template-columns 0.25s ease;
     }
 
     .app.left-collapsed {
-      --left-w: 58px;
+      --left-w: 56px;
     }
 
     .app.right-collapsed {
-      --right-w: 58px;
+      --right-w: 56px;
     }
 
     .sidebar,
@@ -131,7 +134,7 @@
       background: #eef5e8;
       color: var(--green-dark);
       font-family: "Boogaloo", cursive;
-      font-size: 1.35rem;
+      font-size: 1.28rem;
       padding: 9px;
       cursor: pointer;
       margin-bottom: 10px;
@@ -142,7 +145,7 @@
       writing-mode: vertical-rl;
       text-orientation: mixed;
       height: 190px;
-      font-size: 1.05rem;
+      font-size: 1rem;
       margin: 0 auto;
     }
 
@@ -153,7 +156,7 @@
 
     .sidebar h2 {
       margin: 0 0 10px;
-      font-size: 1.9rem;
+      font-size: 1.85rem;
     }
 
     .control-block,
@@ -262,7 +265,7 @@
       padding: 10px;
       cursor: pointer;
       font-family: "Cabin", Arial, sans-serif;
-      font-size: 0.98rem;
+      font-size: 0.97rem;
       font-weight: 800;
       text-align: center;
     }
@@ -300,7 +303,7 @@
       cursor: pointer;
       list-style: none;
       padding: 9px 10px;
-      font-size: 1.25rem;
+      font-size: 1.22rem;
       user-select: none;
     }
 
@@ -325,25 +328,26 @@
       text-align: center;
       font-weight: 800;
       border-bottom: 1px solid #9ca3af;
-      margin-bottom: 8px;
-      padding-bottom: 4px;
+      margin-bottom: 6px;
+      padding-bottom: 3px;
+      font-size: 0.95rem;
     }
 
     .key-row {
       display: grid;
-      grid-template-columns: 92px 1fr;
-      gap: 8px;
+      grid-template-columns: 74px 1fr;
+      gap: 6px;
       align-items: center;
-      margin: 7px 0;
-      font-size: 0.9rem;
+      margin: 5px 0;
+      font-size: 0.82rem;
     }
 
     .center-grid {
       min-width: 0;
       min-height: 0;
       display: grid;
-      grid-template-rows: 56fr 29fr 15fr;
-      gap: 12px;
+      grid-template-rows: 55fr 28fr 17fr;
+      gap: 10px;
     }
 
     .model-card,
@@ -351,18 +355,18 @@
     .explanation-card {
       min-height: 0;
       overflow: hidden;
-      padding: 12px;
+      padding: 10px;
     }
 
     .model-card h2,
     .explanation-card h2 {
-      margin: 0 0 8px;
-      font-size: 1.85rem;
+      margin: 0 0 6px;
+      font-size: 1.8rem;
     }
 
     .scene-wrap {
       position: relative;
-      height: calc(100% - 42px);
+      height: calc(100% - 38px);
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 16px;
@@ -389,6 +393,8 @@
       pointer-events: none;
       z-index: 2;
       transition: background 0.2s ease;
+      top: var(--room-top);
+      height: calc(var(--room-bottom) - var(--room-top));
     }
 
     #roomATint {
@@ -457,12 +463,12 @@
       min-height: 0;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .viewer-card {
       display: grid;
-      grid-template-columns: 42% 1fr;
+      grid-template-columns: 44% 1fr;
       gap: 10px;
       align-items: stretch;
     }
@@ -471,20 +477,59 @@
       min-height: 0;
       border: 1px solid var(--border);
       border-radius: 14px;
-      background: #f8fafc;
+      background: #000000;
       overflow: hidden;
       position: relative;
     }
 
-    .viewer-visual svg {
+    .viewer-layer {
       position: absolute;
       inset: 0;
-      width: 100%;
-      height: 100%;
+      background-image: var(--scene-url);
+      background-repeat: no-repeat;
+      transition: opacity 0.25s ease;
+      opacity: 0;
     }
 
-    .viewer-layer {
-      transition: opacity 0.25s ease;
+    .viewer-layer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: transparent;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .layer-warm::after {
+      background: rgba(240, 196, 60, 0.42);
+    }
+
+    .layer-cool::after {
+      background: rgba(143, 194, 255, 0.42);
+    }
+
+    .crop-student {
+      background-size: 285% auto;
+      background-position: 19% 49%;
+    }
+
+    .crop-teacher {
+      background-size: 285% auto;
+      background-position: 80% 49%;
+    }
+
+    .layer-label {
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.82);
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: var(--text);
     }
 
     .viewer-info {
@@ -494,11 +539,11 @@
       justify-content: center;
       font-size: 0.9rem;
       color: var(--muted);
-      line-height: 1.3;
+      line-height: 1.28;
     }
 
     .viewer-info h2 {
-      font-size: 1.3rem;
+      font-size: 1.25rem;
       margin: 0 0 6px;
     }
 
@@ -535,7 +580,7 @@
     .explanation-card {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .explanation-box {
@@ -554,16 +599,16 @@
     }
 
     .explanation-box h2 {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
     }
 
     .explanation-box h3 {
-      font-size: 1.1rem;
+      font-size: 1.05rem;
     }
 
     .explanation-box p {
       margin: 0;
-      font-size: 0.9rem;
+      font-size: 0.89rem;
     }
 
     .prompt {
@@ -571,7 +616,7 @@
       color: var(--green-dark);
     }
 
-    @media (max-width: 1050px), (max-height: 720px) {
+    @media (max-width: 1100px), (max-height: 720px) {
       body {
         overflow: auto;
         display: block;
@@ -610,12 +655,11 @@
       }
 
       .viewer-visual {
-        height: 220px;
+        height: 230px;
       }
     }
   </style>
 </head>
-
 <body>
   <header>
     <h1>One-way Mirror Simulator</h1>
@@ -673,7 +717,7 @@
           <div class="material-options">
             <button class="material-button" data-material="glass">Clear glass</button>
             <button class="material-button" data-material="oneWayMirror">One-way mirror</button>
-            <button class="material-button" data-material="mirror">Plane mirror</button>
+            <button class="material-button" data-material="mirror">Regular mirror</button>
           </div>
 
           <div class="checkbox-row">
@@ -700,57 +744,46 @@
           <svg class="light-wash" viewBox="0 0 1366 768" preserveAspectRatio="none">
             <defs>
               <radialGradient id="warmGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#facc15" stop-opacity="0.55"></stop>
-                <stop offset="55%" stop-color="#facc15" stop-opacity="0.18"></stop>
-                <stop offset="100%" stop-color="#facc15" stop-opacity="0"></stop>
+                <stop offset="0%" stop-color="#f0c43c" stop-opacity="0.60"></stop>
+                <stop offset="55%" stop-color="#f0c43c" stop-opacity="0.20"></stop>
+                <stop offset="100%" stop-color="#f0c43c" stop-opacity="0"></stop>
               </radialGradient>
 
               <radialGradient id="coolGlow" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.55"></stop>
-                <stop offset="55%" stop-color="#93c5fd" stop-opacity="0.18"></stop>
-                <stop offset="100%" stop-color="#93c5fd" stop-opacity="0"></stop>
+                <stop offset="0%" stop-color="#8fc2ff" stop-opacity="0.60"></stop>
+                <stop offset="55%" stop-color="#8fc2ff" stop-opacity="0.20"></stop>
+                <stop offset="100%" stop-color="#8fc2ff" stop-opacity="0"></stop>
               </radialGradient>
             </defs>
 
-            <circle id="roomAGlow" cx="345" cy="158" r="215" fill="url(#warmGlow)"></circle>
-            <circle id="roomBGlow" cx="1036" cy="158" r="215" fill="url(#coolGlow)"></circle>
+            <circle id="roomAGlow" cx="345" cy="156" r="205" fill="url(#warmGlow)"></circle>
+            <circle id="roomBGlow" cx="1028" cy="156" r="205" fill="url(#coolGlow)"></circle>
           </svg>
 
           <svg class="mirror-overlay" viewBox="0 0 1366 768" preserveAspectRatio="none">
-            <rect id="mainBarrierHighlight" x="696" y="18" width="12" height="735" rx="5" fill="#618839" opacity="0.28"></rect>
+            <rect id="mainBarrierHighlight" x="686" y="63" width="10" height="612" rx="5" fill="#618839" opacity="0.26"></rect>
           </svg>
 
           <svg class="ray-svg" viewBox="0 0 1366 768" preserveAspectRatio="none">
             <defs>
-              <marker id="arrowA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"></path>
+              <marker id="arrowWarm" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#f0c43c"></path>
               </marker>
 
-              <marker id="arrowB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"></path>
-              </marker>
-
-              <marker id="arrowLampA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#facc15"></path>
-              </marker>
-
-              <marker id="arrowLampB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                <path d="M0,0 L0,6 L9,3 z" fill="#93c5fd"></path>
+              <marker id="arrowCool" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                <path d="M0,0 L0,6 L9,3 z" fill="#8fc2ff"></path>
               </marker>
             </defs>
 
-            <!-- Light source to object -->
-            <line id="rayABulbToHead" stroke="#facc15" marker-end="url(#arrowLampA)"></line>
-            <line id="rayBBulbToHead" stroke="#93c5fd" marker-end="url(#arrowLampB)"></line>
+            <line id="rayABulbToHead" stroke="#f0c43c" marker-end="url(#arrowWarm)"></line>
+            <line id="rayAHeadToMirror" stroke="#f0c43c" marker-end="url(#arrowWarm)"></line>
+            <line id="rayAMirrorToStudentEye" stroke="#f0c43c" marker-end="url(#arrowWarm)"></line>
+            <line id="rayAMirrorToTeacherEye" stroke="#f0c43c" marker-end="url(#arrowWarm)"></line>
 
-            <!-- Light reflected from objects to mirror and then into eyes -->
-            <line id="rayAHeadToMirror" stroke="#f59e0b" marker-end="url(#arrowA)"></line>
-            <line id="rayAMirrorToStudentEye" stroke="#f59e0b" marker-end="url(#arrowA)"></line>
-            <line id="rayAMirrorToTeacherEye" stroke="#f59e0b" marker-end="url(#arrowA)"></line>
-
-            <line id="rayBHeadToMirror" stroke="#2563eb" marker-end="url(#arrowB)"></line>
-            <line id="rayBMirrorToTeacherEye" stroke="#2563eb" marker-end="url(#arrowB)"></line>
-            <line id="rayBMirrorToStudentEye" stroke="#2563eb" marker-end="url(#arrowB)"></line>
+            <line id="rayBBulbToHead" stroke="#8fc2ff" marker-end="url(#arrowCool)"></line>
+            <line id="rayBHeadToMirror" stroke="#8fc2ff" marker-end="url(#arrowCool)"></line>
+            <line id="rayBMirrorToTeacherEye" stroke="#8fc2ff" marker-end="url(#arrowCool)"></line>
+            <line id="rayBMirrorToStudentEye" stroke="#8fc2ff" marker-end="url(#arrowCool)"></line>
           </svg>
 
           <div class="scene-label left">Room A: music student</div>
@@ -761,32 +794,13 @@
 
       <section class="viewer-row">
         <article class="viewer-card">
-          <div class="viewer-visual">
-            <svg viewBox="0 0 220 280" preserveAspectRatio="xMidYMid meet">
-              <rect width="220" height="280" fill="#fff8dc"></rect>
-
-              <g id="viewerAThrough" class="viewer-layer">
-                <text x="110" y="28" text-anchor="middle" font-size="18" font-family="Boogaloo, cursive" fill="#1f2937">Seen through</text>
-                <circle cx="110" cy="78" r="22" fill="#2563eb"></circle>
-                <rect x="86" y="103" width="48" height="78" rx="18" fill="#93c5fd"></rect>
-                <line x1="88" y1="125" x2="55" y2="157" stroke="#1e40af" stroke-width="8" stroke-linecap="round"></line>
-                <line x1="132" y1="125" x2="165" y2="157" stroke="#1e40af" stroke-width="8" stroke-linecap="round"></line>
-                <text x="110" y="218" text-anchor="middle" font-size="15" fill="#1f2937">Teacher</text>
-              </g>
-
-              <g id="viewerAReflect" class="viewer-layer">
-                <rect width="220" height="280" fill="rgba(255,255,255,0.45)"></rect>
-                <text x="110" y="28" text-anchor="middle" font-size="18" font-family="Boogaloo, cursive" fill="#618839">Reflection</text>
-                <circle cx="88" cy="78" r="22" fill="#f97316"></circle>
-                <rect x="66" y="103" width="44" height="78" rx="18" fill="#fb923c"></rect>
-                <line x1="68" y1="127" x2="36" y2="160" stroke="#9a3412" stroke-width="8" stroke-linecap="round"></line>
-                <line x1="108" y1="127" x2="150" y2="160" stroke="#9a3412" stroke-width="8" stroke-linecap="round"></line>
-                <ellipse cx="158" cy="170" rx="34" ry="22" fill="#92400e" transform="rotate(-18 158 170)"></ellipse>
-                <circle cx="158" cy="170" r="7" fill="#451a03"></circle>
-                <line x1="181" y1="158" x2="210" y2="148" stroke="#78350f" stroke-width="7" stroke-linecap="round"></line>
-                <text x="110" y="218" text-anchor="middle" font-size="15" fill="#1f2937">Music student</text>
-              </g>
-            </svg>
+          <div id="viewerAVisual" class="viewer-visual">
+            <div id="viewerAThrough" class="viewer-layer crop-teacher layer-cool">
+              <span class="layer-label">Seen through</span>
+            </div>
+            <div id="viewerAReflect" class="viewer-layer crop-student layer-warm">
+              <span class="layer-label">Reflection</span>
+            </div>
           </div>
 
           <div class="viewer-info">
@@ -812,32 +826,13 @@
         </article>
 
         <article class="viewer-card">
-          <div class="viewer-visual">
-            <svg viewBox="0 0 220 280" preserveAspectRatio="xMidYMid meet">
-              <rect width="220" height="280" fill="#eef6ff"></rect>
-
-              <g id="viewerBThrough" class="viewer-layer">
-                <text x="110" y="28" text-anchor="middle" font-size="18" font-family="Boogaloo, cursive" fill="#1f2937">Seen through</text>
-                <circle cx="82" cy="78" r="22" fill="#f97316"></circle>
-                <rect x="60" y="103" width="44" height="78" rx="18" fill="#fb923c"></rect>
-                <line x1="62" y1="127" x2="32" y2="160" stroke="#9a3412" stroke-width="8" stroke-linecap="round"></line>
-                <line x1="102" y1="127" x2="145" y2="160" stroke="#9a3412" stroke-width="8" stroke-linecap="round"></line>
-                <ellipse cx="156" cy="170" rx="34" ry="22" fill="#92400e" transform="rotate(-18 156 170)"></ellipse>
-                <circle cx="156" cy="170" r="7" fill="#451a03"></circle>
-                <line x1="179" y1="158" x2="210" y2="148" stroke="#78350f" stroke-width="7" stroke-linecap="round"></line>
-                <text x="110" y="218" text-anchor="middle" font-size="15" fill="#1f2937">Music student</text>
-              </g>
-
-              <g id="viewerBReflect" class="viewer-layer">
-                <rect width="220" height="280" fill="rgba(255,255,255,0.45)"></rect>
-                <text x="110" y="28" text-anchor="middle" font-size="18" font-family="Boogaloo, cursive" fill="#618839">Reflection</text>
-                <circle cx="110" cy="78" r="22" fill="#2563eb"></circle>
-                <rect x="86" y="103" width="48" height="78" rx="18" fill="#93c5fd"></rect>
-                <line x1="88" y1="125" x2="55" y2="157" stroke="#1e40af" stroke-width="8" stroke-linecap="round"></line>
-                <line x1="132" y1="125" x2="165" y2="157" stroke="#1e40af" stroke-width="8" stroke-linecap="round"></line>
-                <text x="110" y="218" text-anchor="middle" font-size="15" fill="#1f2937">Teacher</text>
-              </g>
-            </svg>
+          <div id="viewerBVisual" class="viewer-visual">
+            <div id="viewerBThrough" class="viewer-layer crop-student layer-warm">
+              <span class="layer-label">Seen through</span>
+            </div>
+            <div id="viewerBReflect" class="viewer-layer crop-teacher layer-cool">
+              <span class="layer-label">Reflection</span>
+            </div>
           </div>
 
           <div class="viewer-info">
@@ -883,19 +878,13 @@
         <details class="side-details" open>
           <summary>Show mirror close-up ▼</summary>
           <div class="details-content">
-            <svg class="zoom-svg" viewBox="0 0 360 300" aria-label="Mirror close-up">
+            <svg id="zoomSvg" class="zoom-svg" viewBox="0 0 360 300" aria-label="Mirror close-up">
               <defs>
-                <marker id="zoomArrowA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                  <path d="M0,0 L0,6 L9,3 z" fill="#f59e0b"></path>
+                <marker id="zoomArrowWarm" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#f0c43c"></path>
                 </marker>
-                <marker id="zoomArrowB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                  <path d="M0,0 L0,6 L9,3 z" fill="#2563eb"></path>
-                </marker>
-                <marker id="zoomLampA" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                  <path d="M0,0 L0,6 L9,3 z" fill="#facc15"></path>
-                </marker>
-                <marker id="zoomLampB" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                  <path d="M0,0 L0,6 L9,3 z" fill="#93c5fd"></path>
+                <marker id="zoomArrowCool" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                  <path d="M0,0 L0,6 L9,3 z" fill="#8fc2ff"></path>
                 </marker>
               </defs>
 
@@ -904,17 +893,17 @@
               <text x="90" y="30" text-anchor="middle" font-size="16" font-weight="800">Room A side</text>
               <text x="270" y="30" text-anchor="middle" font-size="16" font-weight="800">Room B side</text>
 
-              <rect id="zoomBarrier" x="174" y="55" width="12" height="200" rx="6" fill="#94a3b8"></rect>
+              <rect id="zoomBarrier" x="174" y="52" width="12" height="205" rx="6" fill="#94a3b8"></rect>
 
-              <line id="zoomAIncident" x1="58" y1="166" x2="180" y2="150" stroke="#f59e0b" marker-end="url(#zoomArrowA)"></line>
-              <line id="zoomAReflect" x1="180" y1="150" x2="58" y2="134" stroke="#f59e0b" marker-end="url(#zoomArrowA)"></line>
-              <line id="zoomATransmit" x1="180" y1="150" x2="302" y2="134" stroke="#f59e0b" marker-end="url(#zoomArrowA)"></line>
+              <line id="zoomAIncident" stroke="#f0c43c" marker-end="url(#zoomArrowWarm)"></line>
+              <line id="zoomAReflect" stroke="#f0c43c" marker-end="url(#zoomArrowWarm)"></line>
+              <line id="zoomATransmit" stroke="#f0c43c" marker-end="url(#zoomArrowWarm)"></line>
 
-              <line id="zoomBIncident" x1="302" y1="202" x2="180" y2="188" stroke="#2563eb" marker-end="url(#zoomArrowB)"></line>
-              <line id="zoomBReflect" x1="180" y1="188" x2="302" y2="174" stroke="#2563eb" marker-end="url(#zoomArrowB)"></line>
-              <line id="zoomBTransmit" x1="180" y1="188" x2="58" y2="174" stroke="#2563eb" marker-end="url(#zoomArrowB)"></line>
+              <line id="zoomBIncident" stroke="#8fc2ff" marker-end="url(#zoomArrowCool)"></line>
+              <line id="zoomBReflect" stroke="#8fc2ff" marker-end="url(#zoomArrowCool)"></line>
+              <line id="zoomBTransmit" stroke="#8fc2ff" marker-end="url(#zoomArrowCool)"></line>
 
-              <text id="zoomMaterialText" x="180" y="276" text-anchor="middle" font-size="24" font-family="Boogaloo, cursive" fill="#618839">One-way mirror</text>
+              <text id="zoomMaterialText" x="180" y="282" text-anchor="middle" font-size="24" font-family="Boogaloo, cursive" fill="#618839">One-way mirror</text>
             </svg>
           </div>
         </details>
@@ -925,34 +914,34 @@
             <div class="key-title">KEY</div>
 
             <div class="key-row">
-              <svg viewBox="0 0 120 20">
+              <svg viewBox="0 0 90 16" width="74" height="14" aria-hidden="true">
                 <defs>
-                  <marker id="keyArrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-                    <path d="M0,0 L0,6 L9,3 z" fill="#111827"></path>
+                  <marker id="keyArrow" markerWidth="8" markerHeight="8" refX="6.8" refY="2.5" orient="auto">
+                    <path d="M0,0 L0,5 L7,2.5 z" fill="#111827"></path>
                   </marker>
                 </defs>
-                <line x1="5" y1="10" x2="108" y2="10" stroke="#111827" stroke-width="5" marker-end="url(#keyArrow)"></line>
+                <line x1="3" y1="8" x2="65" y2="8" stroke="#111827" stroke-width="4.5" marker-end="url(#keyArrow)"></line>
               </svg>
               <span>all light</span>
             </div>
 
             <div class="key-row">
-              <svg viewBox="0 0 120 20">
-                <line x1="5" y1="10" x2="108" y2="10" stroke="#111827" stroke-width="3.5" marker-end="url(#keyArrow)"></line>
+              <svg viewBox="0 0 90 16" width="74" height="14" aria-hidden="true">
+                <line x1="3" y1="8" x2="65" y2="8" stroke="#111827" stroke-width="3.2" marker-end="url(#keyArrow)"></line>
               </svg>
               <span>most light</span>
             </div>
 
             <div class="key-row">
-              <svg viewBox="0 0 120 20">
-                <line x1="5" y1="10" x2="108" y2="10" stroke="#111827" stroke-width="3" stroke-dasharray="10 7" marker-end="url(#keyArrow)"></line>
+              <svg viewBox="0 0 90 16" width="74" height="14" aria-hidden="true">
+                <line x1="3" y1="8" x2="65" y2="8" stroke="#111827" stroke-width="2.8" stroke-dasharray="8 5" marker-end="url(#keyArrow)"></line>
               </svg>
               <span>some light</span>
             </div>
 
             <div class="key-row">
-              <svg viewBox="0 0 120 20">
-                <line x1="5" y1="10" x2="108" y2="10" stroke="#111827" stroke-width="2.5" stroke-dasharray="1 7" stroke-linecap="round" marker-end="url(#keyArrow)"></line>
+              <svg viewBox="0 0 90 16" width="74" height="14" aria-hidden="true">
+                <line x1="3" y1="8" x2="65" y2="8" stroke="#111827" stroke-width="2.3" stroke-dasharray="1 6" stroke-linecap="round" marker-end="url(#keyArrow)"></line>
               </svg>
               <span>a little light</span>
             </div>
@@ -964,21 +953,30 @@
 
   <script>
     const SCENE_WIDTH = 1366;
-    const MIRROR_RATIO = 0.514;
-    const MIRROR_X = SCENE_WIDTH * MIRROR_RATIO;
+    const SCENE_HEIGHT = 768;
 
     const geometry = {
-      bulbA: { x: 345, y: 150 },
-      bulbB: { x: 1036, y: 150 },
+      mirrorX: 692,
+      ceilingY: 63,
+      floorY: 675,
 
-      studentHead: { x: 345, y: 340 },
-      studentEye: { x: 352, y: 353 },
+      bulbA: { x: 349, y: 157 },
+      bulbB: { x: 1030, y: 157 },
 
-      teacherHead: { x: 1030, y: 345 },
-      teacherEye: { x: 1034, y: 356 },
+      studentHit: { x: 354, y: 306 },
+      teacherHit: { x: 1021, y: 307 },
 
-      mirrorA: { x: MIRROR_X, y: 346 },
-      mirrorB: { x: MIRROR_X, y: 356 }
+      studentEye: { x: 335, y: 348 },
+      teacherEye: { x: 1001, y: 348 },
+
+      mirrorA: { x: 692, y: 332 },
+      mirrorB: { x: 692, y: 360 }
+    };
+
+    const closeupGeometry = {
+      mirrorX: 180,
+      mirrorA: { x: 180, y: 146 },
+      mirrorB: { x: 180, y: 184 }
     };
 
     const materials = {
@@ -997,11 +995,11 @@
         explanation: "A one-way mirror reflects some light and lets some light pass through."
       },
       mirror: {
-        name: "Plane mirror",
+        name: "Regular mirror",
         reflectance: 0.95,
         transmittance: 0.00,
         barrierColour: "#cbd5e1",
-        explanation: "A plane mirror reflects almost all the light and lets almost no light pass through."
+        explanation: "A regular mirror reflects almost all the light and lets almost no light pass through."
       }
     };
 
@@ -1021,11 +1019,11 @@
       "roomATint", "roomBTint", "roomAGlow", "roomBGlow",
       "materialBadge", "mainBarrierHighlight",
       "zoomBarrier", "zoomMaterialText",
-      "rayABulbToHead", "rayBBulbToHead",
-      "rayAHeadToMirror", "rayAMirrorToStudentEye", "rayAMirrorToTeacherEye",
-      "rayBHeadToMirror", "rayBMirrorToTeacherEye", "rayBMirrorToStudentEye",
+      "rayABulbToHead", "rayAHeadToMirror", "rayAMirrorToStudentEye", "rayAMirrorToTeacherEye",
+      "rayBBulbToHead", "rayBHeadToMirror", "rayBMirrorToTeacherEye", "rayBMirrorToStudentEye",
       "zoomAIncident", "zoomAReflect", "zoomATransmit",
       "zoomBIncident", "zoomBReflect", "zoomBTransmit",
+      "viewerAVisual", "viewerBVisual",
       "viewerAThrough", "viewerAReflect", "viewerBThrough", "viewerBReflect",
       "viewerAText", "viewerBText",
       "aReflectionValue", "aThroughValue", "bReflectionValue", "bThroughValue",
@@ -1077,20 +1075,16 @@
       if (category === "none") {
         return { opacity: 0, width: 0, dash: "", cap: "butt" };
       }
-
       if (category === "all") {
-        return { opacity: 1, width: 7, dash: "", cap: "butt" };
+        return { opacity: 1, width: 6.5, dash: "", cap: "butt" };
       }
-
       if (category === "most") {
         return { opacity: 0.95, width: 5, dash: "", cap: "butt" };
       }
-
       if (category === "some") {
-        return { opacity: 0.85, width: 4, dash: "12 8", cap: "butt" };
+        return { opacity: 0.85, width: 3.8, dash: "11 7", cap: "butt" };
       }
-
-      return { opacity: 0.75, width: 3, dash: "1 8", cap: "round" };
+      return { opacity: 0.75, width: 2.7, dash: "1 7", cap: "round" };
     }
 
     function setLine(line, start, end) {
@@ -1102,11 +1096,27 @@
 
     function setRay(line, value) {
       const style = lineStyleFor(value);
-
       line.setAttribute("opacity", state.showRays ? style.opacity : 0);
       line.setAttribute("stroke-width", style.width);
       line.setAttribute("stroke-dasharray", style.dash);
       line.setAttribute("stroke-linecap", style.cap);
+    }
+
+    function normalize(vec) {
+      const len = Math.hypot(vec.x, vec.y) || 1;
+      return { x: vec.x / len, y: vec.y / len };
+    }
+
+    function scale(vec, amount) {
+      return { x: vec.x * amount, y: vec.y * amount };
+    }
+
+    function add(a, b) {
+      return { x: a.x + b.x, y: a.y + b.y };
+    }
+
+    function subtract(a, b) {
+      return { x: a.x - b.x, y: a.y - b.y };
     }
 
     function calculate() {
@@ -1138,7 +1148,7 @@
 
     function viewerOpacity(value) {
       if (value <= 1) return 0;
-      return clamp(0.1 + value / 90, 0.1, 1);
+      return clamp(0.08 + value / 92, 0.08, 1);
     }
 
     function setBar(bar, label, value) {
@@ -1149,7 +1159,7 @@
 
     function describeViewer(viewer, reflectionName, throughName, reflection, through) {
       if (reflection <= 2 && through <= 2) {
-        return `<strong>${viewer}:</strong> sees very little because not much light reaches their eyes.`;
+        return `<strong>${viewer}:</strong> sees almost nothing because very little light reaches their eyes.`;
       }
 
       if (reflection > through * 1.35) {
@@ -1163,27 +1173,58 @@
       return `<strong>${viewer}:</strong> sees a mixture of reflection and seeing through.`;
     }
 
-    function updateGeometry() {
-      setLine(el.rayABulbToHead, geometry.bulbA, geometry.studentHead);
-      setLine(el.rayBBulbToHead, geometry.bulbB, geometry.teacherHead);
-
-      setLine(el.rayAHeadToMirror, geometry.studentHead, geometry.mirrorA);
+    function updateMainGeometry() {
+      setLine(el.rayABulbToHead, geometry.bulbA, geometry.studentHit);
+      setLine(el.rayAHeadToMirror, geometry.studentHit, geometry.mirrorA);
       setLine(el.rayAMirrorToStudentEye, geometry.mirrorA, geometry.studentEye);
       setLine(el.rayAMirrorToTeacherEye, geometry.mirrorA, geometry.teacherEye);
 
-      setLine(el.rayBHeadToMirror, geometry.teacherHead, geometry.mirrorB);
+      setLine(el.rayBBulbToHead, geometry.bulbB, geometry.teacherHit);
+      setLine(el.rayBHeadToMirror, geometry.teacherHit, geometry.mirrorB);
       setLine(el.rayBMirrorToTeacherEye, geometry.mirrorB, geometry.teacherEye);
       setLine(el.rayBMirrorToStudentEye, geometry.mirrorB, geometry.studentEye);
 
-      el.mainBarrierHighlight.setAttribute("x", MIRROR_X - 6);
+      el.mainBarrierHighlight.setAttribute("x", geometry.mirrorX - 5);
+      el.mainBarrierHighlight.setAttribute("y", geometry.ceilingY);
+      el.mainBarrierHighlight.setAttribute("height", geometry.floorY - geometry.ceilingY);
+    }
+
+    function updateCloseupGeometry() {
+      const scaleLen = 120;
+
+      // Room A ray directions are derived from the main model
+      const vecAIncident = normalize(subtract(geometry.mirrorA, geometry.studentHit));
+      const vecAReflect = normalize(subtract(geometry.studentEye, geometry.mirrorA));
+      const vecATransmit = normalize(subtract(geometry.teacherEye, geometry.mirrorA));
+
+      const aIncidentStart = add(closeupGeometry.mirrorA, scale(vecAIncident, -scaleLen));
+      const aReflectEnd = add(closeupGeometry.mirrorA, scale(vecAReflect, scaleLen));
+      const aTransmitEnd = add(closeupGeometry.mirrorA, scale(vecATransmit, scaleLen));
+
+      setLine(el.zoomAIncident, aIncidentStart, closeupGeometry.mirrorA);
+      setLine(el.zoomAReflect, closeupGeometry.mirrorA, aReflectEnd);
+      setLine(el.zoomATransmit, closeupGeometry.mirrorA, aTransmitEnd);
+
+      // Room B ray directions are derived from the main model
+      const vecBIncident = normalize(subtract(geometry.mirrorB, geometry.teacherHit));
+      const vecBReflect = normalize(subtract(geometry.teacherEye, geometry.mirrorB));
+      const vecBTransmit = normalize(subtract(geometry.studentEye, geometry.mirrorB));
+
+      const bIncidentStart = add(closeupGeometry.mirrorB, scale(vecBIncident, -scaleLen));
+      const bReflectEnd = add(closeupGeometry.mirrorB, scale(vecBReflect, scaleLen));
+      const bTransmitEnd = add(closeupGeometry.mirrorB, scale(vecBTransmit, scaleLen));
+
+      setLine(el.zoomBIncident, bIncidentStart, closeupGeometry.mirrorB);
+      setLine(el.zoomBReflect, closeupGeometry.mirrorB, bReflectEnd);
+      setLine(el.zoomBTransmit, closeupGeometry.mirrorB, bTransmitEnd);
     }
 
     function updateTints(view) {
       const aDarkness = 1 - view.aLight / 100;
       const bDarkness = 1 - view.bLight / 100;
 
-      el.roomATint.style.background = `rgba(17, 24, 39, ${aDarkness * 0.68})`;
-      el.roomBTint.style.background = `rgba(17, 24, 39, ${bDarkness * 0.68})`;
+      el.roomATint.style.background = `rgba(17, 24, 39, ${aDarkness * 0.70})`;
+      el.roomBTint.style.background = `rgba(17, 24, 39, ${bDarkness * 0.70})`;
 
       el.roomAGlow.style.opacity = view.aLight / 100;
       el.roomBGlow.style.opacity = view.bLight / 100;
@@ -1191,12 +1232,11 @@
 
     function updateRays(view) {
       setRay(el.rayABulbToHead, view.aLight);
-      setRay(el.rayBBulbToHead, view.bLight);
-
       setRay(el.rayAHeadToMirror, view.aLight);
       setRay(el.rayAMirrorToStudentEye, view.aReflect);
       setRay(el.rayAMirrorToTeacherEye, view.aTransmit);
 
+      setRay(el.rayBBulbToHead, view.bLight);
       setRay(el.rayBHeadToMirror, view.bLight);
       setRay(el.rayBMirrorToTeacherEye, view.bReflect);
       setRay(el.rayBMirrorToStudentEye, view.bTransmit);
@@ -1211,11 +1251,21 @@
     }
 
     function updateViewers(view) {
-      el.viewerAReflect.style.opacity = viewerOpacity(view.aReflection);
-      el.viewerAThrough.style.opacity = viewerOpacity(view.aThrough);
+      const aReflectOpacity = viewerOpacity(view.aReflection);
+      const aThroughOpacity = viewerOpacity(view.aThrough);
+      const bReflectOpacity = viewerOpacity(view.bReflection);
+      const bThroughOpacity = viewerOpacity(view.bThrough);
 
-      el.viewerBReflect.style.opacity = viewerOpacity(view.bReflection);
-      el.viewerBThrough.style.opacity = viewerOpacity(view.bThrough);
+      el.viewerAReflect.style.opacity = aReflectOpacity;
+      el.viewerAThrough.style.opacity = aThroughOpacity;
+      el.viewerBReflect.style.opacity = bReflectOpacity;
+      el.viewerBThrough.style.opacity = bThroughOpacity;
+
+      const aTotal = view.aReflection + view.aThrough;
+      const bTotal = view.bReflection + view.bThrough;
+
+      el.viewerAVisual.style.background = aTotal <= 2 ? "#000000" : "#101418";
+      el.viewerBVisual.style.background = bTotal <= 2 ? "#000000" : "#101418";
 
       el.viewerAText.innerHTML = describeViewer(
         "Music student",
@@ -1270,8 +1320,8 @@
 
     function render() {
       const view = calculate();
-
-      updateGeometry();
+      updateMainGeometry();
+      updateCloseupGeometry();
       updateTints(view);
       updateRays(view);
       updateViewers(view);
@@ -1280,14 +1330,12 @@
 
     el.leftToggle.addEventListener("click", () => {
       el.app.classList.toggle("left-collapsed");
-
       const collapsed = el.app.classList.contains("left-collapsed");
       el.leftToggle.textContent = collapsed ? "Show controls ▶" : "Hide controls ◀";
     });
 
     el.rightToggle.addEventListener("click", () => {
       el.app.classList.toggle("right-collapsed");
-
       const collapsed = el.app.classList.contains("right-collapsed");
       el.rightToggle.textContent = collapsed ? "Show side view ◀" : "Hide side view ▶";
     });
